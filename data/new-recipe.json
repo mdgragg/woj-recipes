@@ -1,0 +1,11 @@
+{
+  "title": "new recipe",
+  "ingredients": [
+    "1"
+  ],
+  "directions": "1",
+  "tags": [
+    "quick"
+  ],
+  "slug": "new-recipe"
+}
