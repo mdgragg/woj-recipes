@@ -14,6 +14,7 @@ export default function AddRecipeForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
     try {
       const filteredTags = tags
         .split(",")
@@ -32,20 +33,34 @@ export default function AddRecipeForm() {
           tags: filteredTags,
         }),
       });
+
+      const text = await response.text(); // Get the raw response text for debugging
+
+      // Debugging response
+      console.log("Raw Response:", text);
+
       if (response.ok) {
-        const { slug } = await response.json();
+        const data = JSON.parse(text); // Parse the JSON if the response is OK
+        console.log("Parsed Response:", data);
+
         setTitle("");
         setIngredients("");
         setDirections("");
         setTags("");
-        router.push(`/recipes/${slug}`);
+        router.push(`/recipes/${data.slug}`);
       } else {
-        const errorData = await response.json();
+        // Handle error responses with raw response text
+        const errorData = JSON.parse(text);
+        console.error("API Error Response:", errorData);
         setError(errorData.error || "Failed to add recipe. Please try again.");
       }
     } catch (error) {
       console.error("Error adding recipe:", error);
-      setError("An error occurred. Please try again.");
+
+      // Display a generic error message
+      setError(
+        "An unexpected error occurred while adding the recipe. Please try again."
+      );
     }
   };
 

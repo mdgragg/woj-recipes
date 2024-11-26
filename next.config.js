@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // output: "export",
   reactStrictMode: true,
-  experimental: {
-    // serverActions: true,
+  images: {
+    unoptimized: true,
   },
+  // This is important for Firebase Hosting
+  trailingSlash: true,
 };
 
 module.exports = nextConfig;

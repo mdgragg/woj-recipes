@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "../../../lib/firebaseClient";
 import { collection, getDocs, addDoc } from "firebase/firestore";
+import { addRecipe, getRecipes } from "@/lib/recipes";
 
 export async function GET() {
   try {
-    const recipesCol = collection(db, "recipes");
-    const recipesSnapshot = await getDocs(recipesCol);
-    const recipes = recipesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const recipes = await getRecipes(); // Fetch all recipes
     return NextResponse.json(recipes);
   } catch (error) {
     console.error("Error fetching recipes:", error);
@@ -23,8 +19,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const docRef = await addDoc(collection(db, "recipes"), body);
-    const newRecipe = { id: docRef.id, ...body };
+    const newRecipe = await addRecipe(body); // Use `addRecipe` from `recipes.ts`
     return NextResponse.json(newRecipe, { status: 201 });
   } catch (error) {
     console.error("Error adding recipe:", error);
