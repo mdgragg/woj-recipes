@@ -1,0 +1,8 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/recipes/[slug]/route": "app/api/recipes/[slug]/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/api/recipes/route": "app/api/recipes/route.js",
+  "/page": "app/page.js",
+  "/recipes/[slug]/page": "app/recipes/[slug]/page.js"
+}
