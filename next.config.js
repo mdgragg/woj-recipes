@@ -6,7 +6,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // This is important for Firebase Hosting
-  trailingSlash: true,
+  // trailingSlash: true,
 };
 
 module.exports = nextConfig;

@@ -3,13 +3,40 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Recipe } from "../lib/recipes";
+import { db, collection, getDocs } from "../lib/firebaseClient"; // Updated imports
+import { Recipe } from "../lib/recipes"; // Make sure this matches your Recipe type
 
 function RecipeListContent({ initialRecipes }: { initialRecipes: Recipe[] }) {
   const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Fetch recipes from Firestore
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const recipeCollection = collection(db, "recipes"); // Correct usage of `collection` function
+        const snapshot = await getDocs(recipeCollection); // Fetch documents from Firestore
+        const fetchedRecipes = snapshot.docs.map((doc) => {
+          const data = doc.data(); // Get the document data
+          return {
+            id: doc.id, // Assign the Firestore document ID
+            title: data.title,
+            ingredients: data.ingredients,
+            directions: data.directions,
+            tags: data.tags,
+            slug: data.slug, // Include all other necessary fields from Firestore data
+          };
+        });
+        setRecipes(fetchedRecipes);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    };
+
+    fetchRecipes();
+  }, []); // Empty dependency array means this will run once on mount
 
   useEffect(() => {
     const tags = searchParams.getAll("tags");
@@ -36,11 +63,15 @@ function RecipeListContent({ initialRecipes }: { initialRecipes: Recipe[] }) {
 
   const toggleTag = (tag: string) => {
     const lowercaseTag = tag.toLowerCase();
-    const newTags = selectedTags
-      .map((t) => t.toLowerCase())
-      .includes(lowercaseTag)
-      ? selectedTags.filter((t) => t.toLowerCase() !== lowercaseTag)
-      : [...selectedTags, tag];
+    let newTags: string[];
+
+    if (tag === "All") {
+      newTags = []; // Reset tags when "All" is clicked
+    } else {
+      newTags = selectedTags.map((t) => t.toLowerCase()).includes(lowercaseTag)
+        ? selectedTags.filter((t) => t.toLowerCase() !== lowercaseTag)
+        : [...selectedTags, tag];
+    }
 
     const params = new URLSearchParams();
     newTags.forEach((t) => params.append("tags", t));
@@ -79,7 +110,7 @@ function RecipeListContent({ initialRecipes }: { initialRecipes: Recipe[] }) {
       <ul className="space-y-2">
         {recipes.length > 0 ? (
           recipes.map((recipe) => (
-            <li key={recipe.title} className="py-2">
+            <li key={recipe.id} className="py-2">
               <Link
                 href={`/recipes/${encodeURIComponent(
                   recipe.title.toLowerCase().replace(/ /g, "-")

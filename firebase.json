@@ -19,10 +19,6 @@
       "source": "functions",
       "codebase": "default",
       "runtime": "nodejs18",
-      "memory": "256Mi",
-      "cpu": "1",
-      "maxInstances": 100,
-      "minInstances": 0,
       "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"],
       "ignore": [
         "node_modules",

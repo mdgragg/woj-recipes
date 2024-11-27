@@ -17,15 +17,37 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  console.log("API Route: Received POST request");
+
   try {
     const body = await request.json();
-    const newRecipe = await addRecipe(body); // Use `addRecipe` from `recipes.ts`
-    return NextResponse.json(newRecipe, { status: 201 });
-  } catch (error) {
-    console.error("Error adding recipe:", error);
-    return NextResponse.json(
-      { error: "Failed to add recipe" },
-      { status: 500 }
+    console.log("API Route: Received body", body);
+
+    const newRecipe = await addRecipe(body);
+    console.log("API Route: Recipe added successfully", newRecipe);
+
+    return new NextResponse(JSON.stringify(newRecipe), {
+      status: 201,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error: unknown) {
+    console.error("API Route: Error occurred", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+
+    return new NextResponse(
+      JSON.stringify({
+        error: errorMessage,
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }

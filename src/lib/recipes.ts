@@ -9,6 +9,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import slugify from "slugify";
 
 export type Recipe = {
   id: string;
@@ -20,12 +21,18 @@ export type Recipe = {
 };
 
 // Utility to create slugs from titles
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-}
+// function slugify(
+//   title: string,
+//   p0: {
+//     lower: boolean; // this option makes sure the slug is all lowercase
+//     replacement: string;
+//   }
+// ): string {
+//   return title
+//     .toLowerCase()
+//     .replace(/[^a-z0-9]+/g, "-")
+//     .replace(/(^-|-$)+/g, "");
+// }
 
 // Utility to normalize tags
 function normalizeTags(tags: string[]): string[] {
@@ -46,14 +53,39 @@ export async function getRecipes(): Promise<Recipe[]> {
 }
 
 // Add a new recipe to Firestore
+// export async function addRecipe(
+//   recipe: Omit<Recipe, "id" | "slug">
+// ): Promise<Recipe> {
+//   const slug = slugify(recipe.title);
+//   const normalizedTags = normalizeTags(recipe.tags);
+//   const newRecipe = { ...recipe, slug, tags: normalizedTags };
+//   const docRef = await addDoc(collection(db, "recipes"), newRecipe);
+//   return { id: docRef.id, ...newRecipe };
+// }
+
 export async function addRecipe(
-  recipe: Omit<Recipe, "id" | "slug">
+  recipe: Omit<Recipe, "id" | "slug"> // Omitting id and slug because they are generated
 ): Promise<Recipe> {
-  const slug = slugify(recipe.title);
-  const normalizedTags = normalizeTags(recipe.tags);
-  const newRecipe = { ...recipe, slug, tags: normalizedTags };
-  const docRef = await addDoc(collection(db, "recipes"), newRecipe);
-  return { id: docRef.id, ...newRecipe };
+  try {
+    // Create the slug from the title and normalize tags
+    const slug = slugify(recipe.title, {
+      lower: true,
+      replacement: "",
+    });
+    const normalizedTags = normalizeTags(recipe.tags);
+
+    // Create the new recipe object
+    const newRecipe = { ...recipe, slug, tags: normalizedTags };
+
+    // Add the recipe to Firestore
+    const docRef = await addDoc(collection(db, "recipes"), newRecipe);
+
+    // Return the new recipe with its Firestore document id
+    return { id: docRef.id, ...newRecipe };
+  } catch (error) {
+    console.error("Error adding recipe:", error);
+    throw new Error("Failed to add recipe");
+  }
 }
 
 // Update an existing recipe in Firestore

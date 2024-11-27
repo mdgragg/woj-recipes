@@ -49,15 +49,18 @@ export default function AddRecipeForm() {
         setTags("");
         router.push(`/recipes/${data.slug}`);
       } else {
-        // Handle error responses with raw response text
-        const errorData = JSON.parse(text);
-        console.error("API Error Response:", errorData);
-        setError(errorData.error || "Failed to add recipe. Please try again.");
+        let errorMessage = "Failed to add recipe. Please try again.";
+        try {
+          const errorData = JSON.parse(text);
+          errorMessage = errorData.error || errorMessage;
+          console.error("API Error Response:", errorData);
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError);
+        }
+        setError(errorMessage);
       }
     } catch (error) {
       console.error("Error adding recipe:", error);
-
-      // Display a generic error message
       setError(
         "An unexpected error occurred while adding the recipe. Please try again."
       );
